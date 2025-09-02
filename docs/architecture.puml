@@ -1,0 +1,38 @@
+!include path/to/AzureCommon.puml
+@startuml ai-messaging-deployment
+!define AzurePuml https://raw.githubusercontent.com/plantuml-stdlib/Azure-PlantUML/release/2-2/dist
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!includeurl AzurePuml/AzureCommon.puml
+!includeurl AzurePuml/Integration/AzureServiceBusQueue.puml
+!includeurl AzurePuml/Storage/AzureStorage.puml
+!includeurl AzurePuml/Web/AzureWebApp.puml
+!includeurl AzurePuml/Databases/all.puml
+!includeurl AzurePuml/Integration/AzureEventGridTopic.puml
+!includeurl AzurePuml/Compute/AzureFunction.puml
+!includeurl AzurePuml/Containers/AzureContainerApp.puml
+!includeurl AzurePuml/Management/AzureResourceGraphExplorer.puml
+
+LAYOUT_LEFT_RIGHT
+
+title "Azure deployment overview"
+
+
+Container(spa, "browser", "ng-web", "Angular chat app")
+
+System_Boundary(c1, "resource group") {
+    Boundary(vnet, "vnet") {
+        AzureWebApp(ngWeb, "angular ssr", "", "public network access allowed")
+        AzureFunction(funcSk, "chat http trigger", "dotnet, Semantic Kernel chat (stream response)")
+        AzureStorage(st, "storage account", "storage account for Function App", "")
+        
+    }
+}
+
+Rel(ngWeb,spa,"serves")
+BiRel(spa,funcSk,"chat (🗝️)")
+BiRel(funcSk,st,"state")
+
+
+
+@enduml

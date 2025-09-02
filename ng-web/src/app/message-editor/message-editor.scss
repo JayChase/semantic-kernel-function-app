@@ -1,0 +1,38 @@
+:host {
+  display: flex;
+}
+
+.chat-request {
+  &__card {
+    flex: 1 1 100%;
+    padding: 6px;
+  }
+  &__form {
+    display: grid;
+    padding: 3px;
+    gap: 3px;
+    padding: 3px;
+    grid-template-rows: 1fr auto;
+    grid-template-columns: 1fr auto auto;
+    min-height: 72px;
+  }
+  &__prompt {
+    grid-row: 1;
+    grid-column: 1 / -1;
+  }
+  &__key {
+    grid-row: 2;
+    grid-column: 0 / 1;
+  }
+  &__ask {
+    grid-row: 2;
+    grid-column: 3;
+  }
+  &__mic {
+    grid-row: 2;
+    grid-column: 2;
+    &--listening {
+      background: var(--mat-sys-secondary-fixed-dim);
+    }
+  }
+}

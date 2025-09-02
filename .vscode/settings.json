@@ -1,0 +1,15 @@
+{
+  "azureFunctions.deploySubpath": "sk-chat/SkChat/bin/Release/net9.0/publish",
+  "azureFunctions.projectLanguage": "C#",
+  "azureFunctions.projectRuntime": "~4",
+  "debug.internalConsoleOptions": "neverOpen",
+  "azureFunctions.preDeployTask": "publish (functions)",
+  "workbench.colorCustomizations": {
+    "terminal.ansiRed": "#f2bb00",
+    "terminal.ansiBrightRed": "#f2bb00"
+  },
+  "cSpell.words": [
+    "deepseek"
+  ],
+  "azureFunctions.projectSubpath": "sk-chat/SkChat"
+}

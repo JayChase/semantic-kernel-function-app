@@ -1,0 +1,13 @@
+:host {
+  display: flex;
+}
+
+.api-key {
+  &__card {
+    padding: 6px;
+    flex: 1 1 100%;
+  }
+  &__key-input {
+    flex: 1 1 100%;
+  }
+}

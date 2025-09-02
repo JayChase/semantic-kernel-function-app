@@ -1,0 +1,12 @@
+<app-api-key
+  class="conversation__api-key"
+  (apiKey)="updateKey($event)"
+></app-api-key>
+<app-transcript
+  class="conversation__transcript"
+  [transcript]="(transcript$ | async)!"
+></app-transcript>
+<app-message-editor
+  class="conversation__chat-request-editor"
+  (asked)="converse($event)"
+></app-message-editor>

@@ -1,0 +1,13 @@
+<div class="transcript">
+  @for (part of transcript(); track $index) {
+  <mat-card
+    class="transcript__transcript-card"
+    [class.transcript__user-message]="part.role === 'user'"
+  >
+    <app-chat-message
+      class="transcript__chat-message"
+      [aiMessage]="part"
+    ></app-chat-message>
+  </mat-card>
+  }
+</div>

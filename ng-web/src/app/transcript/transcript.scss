@@ -1,0 +1,24 @@
+.transcript {
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  gap: 12px;
+  &__chat-request {
+    flex: 0 0 auto;
+    align-self: flex-end;
+  }
+  &__transcript-card {
+    flex: 0 0 auto;
+    margin-right: 24px;
+    align-self: flex-end;
+    padding: 6px;
+    max-width: 80%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    overflow: hidden;
+  }
+  &__user-message {
+    align-self: flex-start;
+  }
+}

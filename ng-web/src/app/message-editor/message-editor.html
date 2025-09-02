@@ -1,0 +1,42 @@
+<mat-card class="chat-request__card mat-body-medium">
+  <form class="chat-request__form" [formGroup]="formGroup" (ngSubmit)="ask()">
+    <mat-form-field
+      class="chat-request__prompt mat-body-medium"
+      appearance="outline"
+    >
+      <textarea
+        matInput
+        placeholder="What's on your mind?"
+        cdkTextareaAutosize
+        #autosize="cdkTextareaAutosize"
+        cdkAutosizeMinRows="4"
+        cdkAutosizeMaxRows="35"
+        formControlName="prompt"
+        style="max-height: unset !important"
+        (keydown.enter)="ask(); $event.preventDefault(); $event.stopPropagation()"
+      ></textarea>
+    </mat-form-field>
+
+    <button
+      mat-icon-button
+      type="submit"
+      color="primary"
+      class="chat-request__ask"
+    >
+      <mat-icon>send</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      type="button"
+      color="accent"
+      appSpeechButton
+      #mic="appSpeechButton"
+      [disabled]="!mic.available()"
+      class="chat-request__mic"
+      [class.chat-request__mic--listening]="mic.listening()"
+      (transcriptReady)="write($event)"
+    >
+      <mat-icon>mic</mat-icon>
+    </button>
+  </form>
+</mat-card>

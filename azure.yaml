@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: sk-function-app
+metadata:
+  template: sk-function-app
+
+workflows:
+  up:
+    - azd: provision
+    - azd: package --all
+    - azd: deploy --all
+
+hooks:
+  postprovision:
+    shell: sh
+    run: ./infra/replace-placeholders.sh ng-web/src/environments/environment-template.ts ng-web/src/environments/environment.ts && ./infra/update-local-settings.sh
+
+services:
+  ngWeb:
+    project: ./ng-web    
+    host: appservice
+    language: js
+    dist: dist/ng-web
+  skChat:
+    project: ./sk-chat/SkChat
+    language: dotnet
+    host: function
+
+

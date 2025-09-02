@@ -1,0 +1,64 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node
+{
+  "name": "semantic-kernel-function-app",
+  // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+  "dockerFile": "Dockerfile",
+  // Features to add to the dev container. More info: https://containers.dev/features.
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    },
+    "ghcr.io/devcontainers/features/azure-cli:1": {
+      "version": "latest",
+      "installBicep": true
+    },
+    "ghcr.io/jlaundry/devcontainer-features/azure-functions-core-tools:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:latest": {},
+    "ghcr.io/devcontainers-extra/features/angular-cli:2": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/java:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/powershell:1": {},
+    "ghcr.io/azure/azure-dev/azd:latest": {}
+  },
+  // Configure tool-specific properties.
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "EditorConfig.EditorConfig",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "GitHub.vscode-github-actions",
+        "ms-azuretools.vscode-azurefunctions",
+        "azurite.azurite",
+        "ms-azuretools.azure-dev",
+        "ms-azuretools.vscode-bicep",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker",
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.csdevkit",
+        "humao.rest-client",
+        "runem.lit-plugin",
+        "jebbs.plantuml"
+      ]
+    }
+  },
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [
+    8000,
+    4000,
+    7071
+  ],
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "postCreateCommand": "npm i --prefix ./ng-web/ && dotnet restore sk-chat/",
+  "hostRequirements": {
+    "memory": "8gb"
+  }
+  // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+  // "remoteUser": "root"
+}

@@ -1,0 +1,35 @@
+ @uri = http://localhost:7071/api
+ @uri=https://func-movdd4adkhlj6.azurewebsites.net/api
+###
+
+GET {{uri}}/StreamFunction
+
+###
+
+POST {{uri}}/chat
+content-type: application/json
+
+{
+    "utterance": {
+        "role": "user",
+            "contents": [
+                {
+                "$type": "text",
+                "text": "What are the top 10 landmarks there?"
+                }
+            ]        
+        },
+    "history": [
+        {
+            "role": "user",
+            "contents": [
+                {
+                "$type": "text",
+                "text": "Which is the most visited city in Europe"
+                }
+            ],
+            "messageId": "d1b7f07d-d837-413e-9dac-36d1e451e4b6"
+        }
+        
+    ]
+}

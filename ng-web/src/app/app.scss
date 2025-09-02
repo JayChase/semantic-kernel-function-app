@@ -1,0 +1,22 @@
+:host {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 6px;
+  height: 100vh;
+}
+
+.app {
+  &__toolbar {
+    grid-row: 1;
+    color: var(--mat-sys-primary);
+    background: var(--mat-sys-primary-container);
+  }
+  &__content {
+    grid-row: 2;
+    display: flex;
+    justify-content: stretch;
+    align-items: stretch;
+    overflow: auto;
+    min-height: 0;
+  }
+}
