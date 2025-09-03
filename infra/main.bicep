@@ -80,7 +80,7 @@ var storageAccountName = '${abbrs.storageStorageAccounts}${resourceToken}'
 // Resources
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: !empty(resourceGroupName) ? resourceGroupName : '${abbrs.resourcesResourceGroups}${environmentName}dos'
+  name: !empty(resourceGroupName) ? resourceGroupName : '${abbrs.resourcesResourceGroups}${environmentName}'
   location: location
   tags: tags
 }
@@ -314,7 +314,7 @@ module openAi 'br/public:avm/res/cognitive-services/account:0.9.2' = {
   }
 }
 
-module openaiPrivateEndpoints './storage-private-endpoints.bicep' = {
+module openaiPrivateEndpoints './openai-private-endpoints.bicep' = {
   name: 'openAiPrivateEndpoints'
   scope: resourceGroup
   params: {
@@ -322,7 +322,7 @@ module openaiPrivateEndpoints './storage-private-endpoints.bicep' = {
     tags: tags
     virtualNetworkName: vnet.outputs.name
     subnetName: vnet.outputs.peSubnetName
-    resourceName: storageAccount.outputs.name
+    resourceName: openAi.outputs.name
   }
 }
 
