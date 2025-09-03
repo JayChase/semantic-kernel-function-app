@@ -12,6 +12,7 @@
 !includeurl AzurePuml/Compute/AzureFunction.puml
 !includeurl AzurePuml/Containers/AzureContainerApp.puml
 !includeurl AzurePuml/Management/AzureResourceGraphExplorer.puml
+!includeurl AzurePuml/AIMachineLearning/AzureCognitiveServices.puml
 
 LAYOUT_LEFT_RIGHT
 
@@ -23,15 +24,16 @@ Container(spa, "browser", "ng-web", "Angular chat app")
 System_Boundary(c1, "resource group") {
     Boundary(vnet, "vnet") {
         AzureWebApp(ngWeb, "angular ssr", "", "public network access allowed")
-        AzureFunction(funcSk, "chat http trigger", "dotnet, Semantic Kernel chat (stream response)")
+        AzureFunction(funcSk, "chat HTTP trigger", "dotnet, Semantic Kernel chat (stream response)")
         AzureStorage(st, "storage account", "storage account for Function App", "")
-        
+        AzureCognitiveServices(openai,"Azure Open AI","")
     }
 }
 
 Rel(ngWeb,spa,"serves")
-BiRel(spa,funcSk,"chat (🗝️)")
+BiRel(spa,funcSk,"chat (🗝️)","HTTP stream")
 BiRel(funcSk,st,"state")
+BiRel(funcSk,openai,"")
 
 
 

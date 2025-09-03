@@ -287,7 +287,7 @@ module openAi 'br/public:avm/res/cognitive-services/account:0.9.2' = {
     tags: tags
     kind: 'OpenAI'
     customSubDomainName: '${abbrs.cognitiveServicesAccounts}${resourceToken}'
-    publicNetworkAccess: 'Enabled'
+    publicNetworkAccess: 'Disabled'
     sku: 'S0'
     deployments: [
       {
@@ -311,6 +311,18 @@ module openAi 'br/public:avm/res/cognitive-services/account:0.9.2' = {
         roleDefinitionIdOrName: 'Cognitive Services OpenAI User'
       }
     ]
+  }
+}
+
+module openaiPrivateEndpoints './storage-private-endpoints.bicep' = {
+  name: 'openAiPrivateEndpoints'
+  scope: resourceGroup
+  params: {
+    location: location
+    tags: tags
+    virtualNetworkName: vnet.outputs.name
+    subnetName: vnet.outputs.peSubnetName
+    resourceName: storageAccount.outputs.name
   }
 }
 
