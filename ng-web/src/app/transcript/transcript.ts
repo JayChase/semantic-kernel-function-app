@@ -3,10 +3,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { AiMessage } from '../chat-client/ai-message';
 import { ChatMessage } from '../chat-message/chat-message';
+import { ScrollHere } from '../scroll-here/scroll-here';
 
 @Component({
   selector: 'app-transcript',
-  imports: [ChatMessage, MatCardModule, MatButtonModule],
+  imports: [ChatMessage, MatCardModule, MatButtonModule, ScrollHere],
   templateUrl: './transcript.html',
   styleUrl: './transcript.scss'
 })

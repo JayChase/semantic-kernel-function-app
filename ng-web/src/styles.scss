@@ -7,12 +7,6 @@ html {
   height: 100%;
   @include mat.theme(
     (
-      color: (
-        primary: mat.$orange-palette,
-        secondary: mat.$orange-palette,
-        tertiary: mat.$orange-palette,
-        theme-type: light
-      ),
       typography: Roboto,
       density: -5
     )
@@ -27,6 +21,12 @@ html {
     mat-form-field {
       .mdc-text-field--outlined {
         background: var(--mat-sys-on-primary);
+      }
+    }
+
+    markdown {
+      * {
+        margin: 3px 0;
       }
     }
   }

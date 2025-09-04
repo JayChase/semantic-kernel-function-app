@@ -5,6 +5,7 @@
     [class.transcript__user-message]="part.role === 'user'"
   >
     <app-chat-message
+      [appScrollHere]="part.complete || false"
       class="transcript__chat-message"
       [aiMessage]="part"
     ></app-chat-message>

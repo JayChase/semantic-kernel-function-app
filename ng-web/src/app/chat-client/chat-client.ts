@@ -1,7 +1,9 @@
 import {
   HttpClient,
+  HttpDownloadProgressEvent,
   HttpErrorResponse,
-  HttpParams
+  HttpParams,
+  HttpResponse
 } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import {
@@ -138,23 +140,17 @@ export class ChatClient {
           isHttpDownloadProgressEvent(httpEvent) || isHttpResponse(httpEvent)
       ),
       map((httpEvent) => {
-        return this.textToAiMessage(
-          isHttpDownloadProgressEvent(httpEvent)
-            ? httpEvent.partialText
-            : httpEvent.body
-        );
+        return this.textToAiMessage(httpEvent);
       }),
       map((messages) => {
+        console.log(`messages ${messages}`);
         if (messages.length === 0) {
           return null;
         } else {
-          const aiMessage = {
-            messageId: messages[messages.length - 1].messageId,
-            role: messages[messages.length - 1].role,
-            contents: messages
-              .map((message) => message.contents)
-              .reduce((acc, arr) => [...acc, ...arr], [])
-          };
+          const aiMessage = messages[messages.length - 1];
+          aiMessage.contents = messages
+            .map((message) => message.contents)
+            .reduce((acc, arr) => [...acc, ...arr], []);
 
           return aiMessage;
         }
@@ -163,7 +159,12 @@ export class ChatClient {
     );
   }
 
-  private textToAiMessage(text: string | null | undefined): AiMessage[] {
+  private textToAiMessage(
+    httpEvent: HttpDownloadProgressEvent | HttpResponse<string>
+  ): AiMessage[] {
+    const isProgressEvent = isHttpDownloadProgressEvent(httpEvent);
+    const text = isProgressEvent ? httpEvent.partialText : httpEvent.body;
+
     return (
       text
         ?.split('\n')
@@ -172,6 +173,10 @@ export class ChatClient {
             const aIChatCompletionDelta = line
               ? (JSON.parse(line) as AiMessage)
               : undefined;
+
+            if (aIChatCompletionDelta) {
+              aIChatCompletionDelta.complete = !isProgressEvent;
+            }
 
             return aIChatCompletionDelta;
           } catch (e) {
