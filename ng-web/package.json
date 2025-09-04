@@ -21,7 +21,7 @@
     "@angular/platform-browser-dynamic": "^20.2.3",
     "@angular/platform-server": "^20.2.3",
     "@angular/router": "^20.2.3",
-    "@angular/ssr": "^20.2.1",
+    "@angular/ssr": "^20.2.2",
     "express": "^5.1.0",
     "ngx-markdown": "^20.0.0",
     "normalize.css": "^8.0.1",
@@ -30,8 +30,8 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular/build": "^20.2.1",
-    "@angular/cli": "^20.2.1",
+    "@angular/build": "^20.2.2",
+    "@angular/cli": "^20.2.2",
     "@angular/compiler-cli": "^20.2.3",
     "@types/dom-speech-recognition": "^0.0.6",
     "@types/express": "^5.0.1",
