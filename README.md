@@ -55,11 +55,61 @@ High‑level flow:
 
 ## Prerequisites
 
+Core (all scenarios):
+
 -   Azure subscription with access to Azure OpenAI (model: `gpt-4o-mini`).
 -   Azure CLI (latest) & Azure Developer CLI (azd).
--   Node.js 22 LTS + npm (for Angular local build).
--   .NET 9 SDK.
--   (Optional) Docker / Dev Container or Codespaces.
+-   Git.
+
+If you use the Dev Container / Codespaces: everything else is preinstalled (skip to [Dev Container Quick Start](#dev-container-quick-start)).
+
+Local machine (when NOT using the dev container):
+
+-   Node.js 22 LTS + npm (Angular 19 + SSR build).
+-   .NET 9 SDK (isolated Functions runtime).
+-   Azure Functions Core Tools v4 (for `func start`).
+-   (Optional but recommended) Azurite (Storage emulator) – not strictly required for the current HTTP-only function, but useful and already integrated (scripts & local artifacts). Future storage triggers will need it.
+
+Install helpers (choose one per tool):
+
+Azure Functions Core Tools:
+
+```bash
+# Windows (winget)
+winget install Microsoft.AzureFunctionsCoreTools --source winget
+
+# Windows (chocolatey)
+choco install azure-functions-core-tools --version=4 -y
+
+# macOS (brew)
+brew tap azure/functions
+brew install azure-functions-core-tools@4
+
+# npm (all platforms; requires Node 18+)
+npm i -g azure-functions-core-tools@4 --unsafe-perm true
+```
+
+Verify:
+
+```bash
+func --version
+```
+
+Azurite (pick one):
+
+```bash
+# Global npm install
+npm i -g azurite
+
+# Or run locally without install
+npx azurite --location ./.azurite --silent &
+```
+
+Or install the VS Code "Azurite" extension and press the play button to start the emulator.
+
+Optional:
+
+-   Docker / Dev Container or Codespaces (for the zero‑setup path).
 
 ## Dev Container Quick Start
 
@@ -181,6 +231,83 @@ azd env get-values
     ```
 
 5. Browse `http://localhost:4200` (adjust API base if not using deployed Function).
+
+### Accessing Azure OpenAI from your local machine
+
+The Azure OpenAI resource provisioned by `azd up` has **public network access disabled** and is reachable only through its private endpoint inside the VNet. That means:
+
+-   If you run the Angular front end locally but keep calling the **deployed Function** in Azure, you do NOT need to open the OpenAI resource (the Function still runs in Azure inside the network and can reach it).
+-   If you run the **Function locally** (so the call to Azure OpenAI originates from your machine) you must temporarily allow your local traffic.
+
+Options (choose one):
+
+1. Temporarily enable full public network access (quickest; broadest exposure).
+2. Enable public access but restrict to your current public IP.
+3. Use a secure network path (VPN/ExpressRoute/Dev Tunnel into the VNet) – advanced, not documented here.
+
+#### 1. Enable full public network access (temporary)
+
+```bash
+az cognitiveservices account update \
+    --name <OPENAI_NAME> \
+    --resource-group <RESOURCE_GROUP> \
+    --set properties.publicNetworkAccess=Enabled
+```
+
+Revert when done:
+
+```bash
+az cognitiveservices account update \
+    --name <OPENAI_NAME> \
+    --resource-group <RESOURCE_GROUP> \
+    --set properties.publicNetworkAccess=Disabled
+```
+
+#### 2. Allow only your IP
+
+Get your IP:
+
+```bash
+curl -s https://ifconfig.me
+```
+
+Update (keep defaultAction=Deny while adding an ipRules entry and enabling public network access so the rule applies):
+
+```bash
+IP=$(curl -s https://ifconfig.me)
+az cognitiveservices account update \
+    --name <OPENAI_NAME> \
+    --resource-group <RESOURCE_GROUP> \
+    --set properties.publicNetworkAccess=Enabled \
+                properties.networkAcls.defaultAction=Deny \
+                properties.networkAcls.ipRules="[ { \"value\": \"$IP\" } ]"
+```
+
+To clear the rule:
+
+```bash
+az cognitiveservices account update \
+    --name <OPENAI_NAME> \
+    --resource-group <RESOURCE_GROUP> \
+    --set properties.networkAcls.ipRules='[]' properties.publicNetworkAccess=Disabled
+```
+
+#### Where do I get the names?
+
+Environment outputs after `azd up`:
+
+-   Resource group: `AZURE_RESOURCE_GROUP`
+-   OpenAI account name: you can parse from `AZURE_OPENAI_API__ENDPOINT` (host prefix) or use output `AZURE_OPENAI_API_INSTANCE_` if present.
+
+Example (extract name from endpoint):
+
+```bash
+OPENAI_NAME=$(azd env get-value AZURE_OPENAI_API__ENDPOINT | sed -E 's#https://([^\.]+).*#\1#')
+RG_NAME=$(azd env get-value AZURE_RESOURCE_GROUP)
+echo "$OPENAI_NAME / $RG_NAME"
+```
+
+> Security note: Always revert to the most restrictive posture (private only) once you finish local debugging.
 
 ### Using Azurite (optional offline storage)
 
