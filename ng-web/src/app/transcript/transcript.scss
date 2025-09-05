@@ -11,14 +11,19 @@
     flex: 1 1 auto;
     margin-right: 24px;
     align-self: flex-end;
-    padding: 6px;
+    padding: 3px 9px;
     max-width: 60%;
     word-wrap: break-word;
     overflow-wrap: break-word;
     word-break: break-word;
     overflow: hidden;
   }
+  &__waiting {
+    margin: 0 3px 3px 0;
+    width: 22px;
+  }
   &__user-message {
     align-self: flex-start;
+    align-items: flex-end;
   }
 }

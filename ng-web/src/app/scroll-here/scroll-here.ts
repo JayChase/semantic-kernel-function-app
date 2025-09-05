@@ -7,7 +7,7 @@ import { Directive, effect, ElementRef, inject, input } from '@angular/core';
 export class ScrollHere {
   appScrollHere = input.required<boolean>();
   scrollOptions = input<ScrollIntoViewOptions>({
-    behavior: 'auto',
+    behavior: 'smooth',
     block: 'end',
     inline: 'start'
   });

@@ -1,14 +1,21 @@
 <div class="transcript">
-  @for (part of transcript(); track $index) {
+  @for (part of transcript(); track $index; let last = $last) {
   <mat-card
     class="transcript__transcript-card"
     [class.transcript__user-message]="part.role === 'user'"
   >
     <app-chat-message
-      [appScrollHere]="part.complete || false"
+      [appScrollHere]="last && part.complete || false"
       class="transcript__chat-message"
       [aiMessage]="part"
     ></app-chat-message>
+
+    @if(last && part.role === 'user'){
+    <mat-progress-bar
+      class="transcript__waiting"
+      mode="buffer"
+    ></mat-progress-bar>
+    }
   </mat-card>
   }
 </div>

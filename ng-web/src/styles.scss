@@ -1,4 +1,5 @@
 @use '@angular/material' as mat;
+@use '../_theme-colors' as themeColors;
 @import 'normalize.css';
 @include mat.app-background();
 @include mat.elevation-classes();
@@ -7,6 +8,12 @@ html {
   height: 100%;
   @include mat.theme(
     (
+      color: (
+        primary: themeColors.$primary-palette,
+        secondary: themeColors.$secondary-palette,
+        tertiary: themeColors.$tertiary-palette,
+        theme-type: light
+      ),
       typography: Roboto,
       density: -5
     )
@@ -26,7 +33,7 @@ html {
 
     markdown {
       * {
-        margin: 3px 0;
+        margin: 6px 0;
       }
     }
   }
