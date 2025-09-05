@@ -14,9 +14,6 @@
     "principalId": {
       "value": "${AZURE_PRINCIPAL_ID}"
     },
-    "openAiKey": {
-      "value": "${OPENAI_API_KEY}"
-    },
     "openAiLocation": {
       "value": "${AZURE_OPENAI_LOCATION=eastus}"
     },
