@@ -15,7 +15,7 @@
       "value": "${AZURE_PRINCIPAL_ID}"
     },
     "openAiLocation": {
-      "value": "${AZURE_OPENAI_LOCATION=eastus}"
+      "value": "${AZURE_OPENAI_LOCATION}"
     },
     "openAiApiVersion": {
       "value": "${AZURE_OPENAI_API_VERSION=2024-02-01}"
