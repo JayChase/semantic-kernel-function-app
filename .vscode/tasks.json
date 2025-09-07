@@ -71,7 +71,7 @@
       "type": "func",
       "dependsOn": "build (functions)",
       "options": {
-        "cwd": "${workspaceFolder}/sk-chat/SkChat/bin/Debug/net9.0"
+        "cwd": "${workspaceFolder}/sk-chat/SkChat"
       },
       "command": "host start",
       "isBackground": true,
