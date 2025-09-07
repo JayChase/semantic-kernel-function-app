@@ -143,7 +143,6 @@ export class ChatClient {
         return this.textToAiMessage(httpEvent);
       }),
       map((messages) => {
-        console.log(`messages ${messages}`);
         if (messages.length === 0) {
           return null;
         } else {
