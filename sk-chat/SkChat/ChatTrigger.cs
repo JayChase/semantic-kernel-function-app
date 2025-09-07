@@ -3,13 +3,12 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
-
-using Microsoft.SemanticKernel.Connectors.OpenAI;
-using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 using Microsoft.Azure.Functions.Worker.Http;
-
 using Microsoft.Extensions.AI;
 using System.Text.Json;
+using System.Text.Encodings.Web;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
+using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
 
 namespace SkChat;
@@ -17,10 +16,7 @@ namespace SkChat;
 public class ChatTrigger
 {
     private readonly ILogger<ChatTrigger> _logger;
-
-
     private readonly Kernel _kernel;
-
     private readonly IOptions<JsonSerializerOptions> _jsonSerializerOptions;
 
     public ChatTrigger(ILogger<ChatTrigger> logger, Kernel kernel, IOptions<JsonSerializerOptions> jsonSerializerOptions)
@@ -30,71 +26,64 @@ public class ChatTrigger
         _jsonSerializerOptions = jsonSerializerOptions;
     }
 
-
     [Function("chat")]
-    public async Task Run([HttpTrigger(AuthorizationLevel.Function, "post")] FunctionContext context, [FromBody] ChatPayload chatPayload)
+    public async Task Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req, [FromBody] ChatPayload chatPayload)
     {
-        var httpContext = context.GetHttpContext();
+        var httpContext = req.FunctionContext.GetHttpContext();
 
         if (httpContext == null)
         {
             _logger.LogError("HttpContext is null. Cannot process the request.");
+            // In a real app, you'd want a more robust error response here.
             return;
         }
 
         var response = httpContext.Response;
+        var cancellationToken = httpContext.RequestAborted;
 
         var (isValid, errors) = ModelValidator.Validate(chatPayload);
 
         if (!isValid)
         {
-            response.StatusCode = 400;
-            await response.WriteAsJsonAsync(errors);
-
+            response.StatusCode = StatusCodes.Status400BadRequest;
+            await response.WriteAsJsonAsync(errors, cancellationToken);
+            return;
         }
-        else
-        {
 
+        _logger.LogInformation("Received request body: {ChatPayload}", chatPayload);
 
-            _logger.LogInformation("Received request body: {ChatPayload}", chatPayload);
-
-            //short cut empty requests with a placeholder response
-
-            // Add the history
-            var chatMessages = new List<ChatMessage>
+        var chatMessages = new List<ChatMessage>
         {
             new ChatMessage(ChatRole.System, "You are a helpful assistant. Always reply in markdown format.")
         };
 
-            chatMessages.AddRange(chatPayload.History);
-            //https://devblogs.microsoft.com/semantic-kernel/semantic-kernel-and-microsoft-extensions-ai-better-together-part-2/
+        chatMessages.AddRange(chatPayload.History);
+        chatMessages.Add(chatPayload.Utterance);
 
-            // Add user input        
-            chatMessages.Add(chatPayload.Utterance);
+        var chatClient = _kernel.GetRequiredService<IChatClient>("openAiChatClient");
 
-            // Initialize the chat completion service based on the configured provider
-            var chatClient = _kernel.GetRequiredService<IChatClient>("openAiChatClient");
-            OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
+        response.StatusCode = StatusCodes.Status200OK;
+        response.Headers["Content-Type"] = "text/event-stream";
+        response.Headers["Cache-Control"] = "no-cache";
+        response.Headers["Connection"] = "keep-alive";
+
+        var serializerOptions = new JsonSerializerOptions(_jsonSerializerOptions.Value)
+        {
+            WriteIndented = false,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+
+        try
+        {
+            await foreach (var streamingResult in chatClient.GetStreamingResponseAsync(chatMessages, cancellationToken: cancellationToken))
             {
-                FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
-            };
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    _logger.LogInformation("Request was cancelled by the client.");
+                    break;
+                }
 
-
-
-            //TODO now get this stream json properly like UAI 👇 there must be a plugin for that?
-            // https://devblogs.microsoft.com/semantic-kernel/using-json-schema-for-structured-output-in-net-for-openai-models/
-            // https://dev.to/stormhub/openai-chat-completion-with-json-output-format-l5i
-            // Set the response headers for SSE
-            response.StatusCode = 200;
-            response.Headers["Content-Type"] = "text/event-stream";
-            response.Headers["Cache-Control"] = "no-cache";
-            response.Headers["Connection"] = "keep-alive";
-
-            await using var writer = new StreamWriter(response.Body);
-
-            await foreach (var streamingResult in chatClient.GetStreamingResponseAsync(chatMessages))
-            {
-                if (streamingResult.Contents != null && streamingResult.Contents.Count > 0)
+                if (streamingResult.Contents?.Count > 0)
                 {
                     var content = string.Join(
                         "",
@@ -102,23 +91,45 @@ public class ChatTrigger
                             .OfType<Microsoft.Extensions.AI.TextContent>()
                             .Select(tc => tc.Text)
                     );
-                    _logger.LogInformation("Streaming content: {Content}", content);
 
-                    var chatMessage = new ChatMessage(ChatRole.Assistant, content);
-                    chatMessage.MessageId = streamingResult.MessageId;
-                    var jsonResponse = JsonSerializer.Serialize(chatMessage, new JsonSerializerOptions(_jsonSerializerOptions.Value)
+                    if (!string.IsNullOrEmpty(content))
                     {
-                        WriteIndented = false,
-                        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-                    });
+                        var chatMessage = new ChatMessage(ChatRole.Assistant, content)
+                        {
+                            MessageId = streamingResult.MessageId
+                        };
 
-                    await writer.WriteAsync($"{jsonResponse}\n");
-                    await writer.FlushAsync();
+                        var jsonResponse = JsonSerializer.Serialize(chatMessage, new JsonSerializerOptions(_jsonSerializerOptions.Value)
+                        {
+                            WriteIndented = false,
+                            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                        });
 
+
+                        await response.WriteAsync($"data: {jsonResponse}\n\n", cancellationToken);
+                        await response.Body.FlushAsync(cancellationToken);
+                    }
                 }
             }
-
-
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("The operation was canceled by the client.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred during the streaming chat.");
+            // It's not possible to change the status code after the response has started streaming.
+            // Instead, we send a custom 'error' event to the client.
+            var errorPayload = JsonSerializer.Serialize(new { error = "An internal server error occurred." }, serializerOptions);
+            await response.WriteAsync($"event: error\ndata: {errorPayload}\n\n", CancellationToken.None);
+            await response.Body.FlushAsync(CancellationToken.None);
+        }
+        finally
+        {
+            // Signal the end of the stream to the client, even if an error occurred.
+            await response.WriteAsync("event: done\ndata: [DONE]\n\n", CancellationToken.None);
+            await response.Body.FlushAsync(CancellationToken.None);
         }
     }
 }

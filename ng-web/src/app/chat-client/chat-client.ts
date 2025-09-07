@@ -167,11 +167,12 @@ export class ChatClient {
 
     return (
       text
-        ?.split('\n')
+        ?.split('\n\n')
         .map((line) => {
           try {
-            const aIChatCompletionDelta = line
-              ? (JSON.parse(line) as AiMessage)
+            const data = line.split('data: ')[1];
+            const aIChatCompletionDelta = data
+              ? (JSON.parse(data) as AiMessage)
               : undefined;
 
             if (aIChatCompletionDelta) {
