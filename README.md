@@ -328,15 +328,21 @@ Request (JSON):
 }
 ```
 
-Streaming Response: New line delimited JSON `ChatMessage` objects with cumulative assistant content. Each line resembles:
+Streaming Response: Server-Sent Events (SSE) with the following structure:
 
-```json
-{ "role": "assistant", "content": "Partial or full tokens...", "messageId": "..." }
-```
+-   **`data` events**: A JSON `ChatMessage` object. Each event represents a cumulative update to the assistant's response.
+
+    ```sse
+    data: { "role": "assistant", "content": "Partial or full tokens...", "messageId": "..." }
+
+    ```
+
+-   **`error` event**: Sent if an error occurs mid-stream. The data is a JSON object with an `error` property.
+-   **`done` event**: Sent when the stream is complete. The data is `[DONE]`.
 
 ## Streaming Implementation Details
 
--   Function sets `Content-Type: text/event-stream` but emits newline‑delimited JSON (NDJSON). Front end should treat each line as a delta/cumulative update.
+-   The function uses proper Server-Sent Events (SSE) framing, setting `Content-Type: text/event-stream`. Each message is sent as a `data:` field, followed by two newlines. The stream is terminated with a final `event: done`.
 -   Uses `IChatClient.GetStreamingResponseAsync` from Microsoft.Extensions.AI (Semantic Kernel integration) with optional future hook for tool/function calling (`FunctionChoiceBehavior.Auto()`).
 -   SSE reconnection/backpressure handled client side (not implemented here yet—consider exponential backoff & abort controller).
 
@@ -371,7 +377,6 @@ Streaming Response: New line delimited JSON `ChatMessage` objects with cumulativ
 -   Introduce tool/function calling examples with SK.
 -   Add retry & cancellation on client side.
 -   Add unit tests for chat pipeline and message shaping.
--   Implement proper SSE event framing (event: data) vs. raw NDJSON.
 
 ## Contributing
 
