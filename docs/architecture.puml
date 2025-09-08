@@ -1,5 +1,5 @@
 !include path/to/AzureCommon.puml
-@startuml ai-messaging-deployment
+@startuml semantic-kernel-function-app-architecture
 !define AzurePuml https://raw.githubusercontent.com/plantuml-stdlib/Azure-PlantUML/release/2-2/dist
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
