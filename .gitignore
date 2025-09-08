@@ -29,3 +29,5 @@ TODO
 **/.env
 
 __azurite**
+__queuestorage**
+__blobstorage**
