@@ -43,7 +43,7 @@ public class ChatTrigger
 
         var (isValid, errors) = ModelValidator.Validate(chatPayload);
 
-        if (!isValid)
+        if (!isValid || string.IsNullOrEmpty(chatPayload.Utterance.Text))
         {
             response.StatusCode = StatusCodes.Status400BadRequest;
             await response.WriteAsJsonAsync(errors, cancellationToken);
