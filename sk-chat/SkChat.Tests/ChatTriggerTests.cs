@@ -31,8 +31,8 @@ public class ChatTriggerTests
         _jsonOptions = new JsonSerializerOptions
         {
             AllowTrailingCommas = true,
-            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
-            DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
             PropertyNameCaseInsensitive = true,
             WriteIndented = true
         };
@@ -58,13 +58,21 @@ public class ChatTriggerTests
         var provider = CreateServiceProviderWithServices(chatClientMock.Object);
         var kernel = new Kernel(provider);
         var function = new ChatTrigger(_logger.Object, kernel, _optionsJson);
+
+        // Set up HttpContext for streaming response
+        var httpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext();
+        var responseStream = new MemoryStream();
+        httpContext.Response.Body = responseStream;
+
         var context = new FakeFunctionContext(provider);
+        context.SetHttpContext(httpContext);
+
         var req = new FakeHttpRequestData(context);
         var payload = new ChatPayload { Utterance = new ChatMessage(ChatRole.User, "Hello"), History = new[] { new ChatMessage(ChatRole.User, "Hi there") } };
-        var payloadJson = System.Text.Json.JsonSerializer.Serialize(payload, _jsonOptions);
-        var payloadBytes = System.Text.Encoding.UTF8.GetBytes(payloadJson);
+        var payloadJson = JsonSerializer.Serialize(payload, _jsonOptions);
+        var payloadBytes = Encoding.UTF8.GetBytes(payloadJson);
         req.Body.Write(payloadBytes, 0, payloadBytes.Length);
-        req.Body.Seek(0, System.IO.SeekOrigin.Begin);
+        req.Body.Seek(0, SeekOrigin.Begin);
 
         // Mock the chat client
         var streamingResults = GetStreamingResults(new[] { "Hi", null, " there!" });
@@ -88,17 +96,17 @@ public class ChatTriggerTests
             }));
 
         // Act
-        await function.Run(context, payload);
+        await function.Run(req, payload);
 
         // Assert
-        // Since the method returns void, we need to check the response through the context
-        // This will need to be adapted based on how FakeFunctionContext exposes the response
-        // TODO: Update these assertions based on the actual test framework implementation
-        // Assert.True(response.Headers.TryGetValues("Content-Type", out var contentTypes));
-        // Assert.Contains("application/json", contentTypes);
-        // var body = await FakeHttpResponseData.ReadBodyAsStringAsync(response);
-        // Assert.Contains("Hi", body);
-        // Assert.Contains("there!", body);
+        httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
+        using var reader = new StreamReader(httpContext.Response.Body);
+        var body = await reader.ReadToEndAsync();
+
+        Assert.Equal(200, httpContext.Response.StatusCode);
+        Assert.Equal("text/event-stream", httpContext.Response.Headers["Content-Type"]);
+        Assert.Contains("Hi", body);
+        Assert.Contains("there!", body);
         Assert.Contains(logInvocations, v => v != null && v.ToString() != null && v.ToString()!.Contains("Received request body"));
     }
 
@@ -110,17 +118,22 @@ public class ChatTriggerTests
         var provider = CreateServiceProviderWithServices(chatClientMock.Object);
         var kernel = new Kernel(provider);
         var function = new ChatTrigger(_logger.Object, kernel, _optionsJson);
+        var httpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext();
+        var responseStream = new MemoryStream();
+        httpContext.Response.Body = responseStream;
         var context = new FakeFunctionContext(provider);
+        context.SetHttpContext(httpContext);
         var req = new FakeHttpRequestData(context);
 
         // Act
-        await function.Run(context, null!);
+        await function.Run(req, null!);
 
         // Assert
-        // TODO: Update these assertions based on the actual test framework implementation
-        // Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
-        // var body = await FakeHttpResponseData.ReadBodyAsStringAsync(response);
-        // Assert.Contains("Model is null", body);
+        httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
+        using var reader = new StreamReader(httpContext.Response.Body);
+        var body = await reader.ReadToEndAsync();
+        Assert.Equal(400, httpContext.Response.StatusCode);
+        Assert.Contains("Model is null", body);
     }
 
     [Fact]
@@ -131,22 +144,27 @@ public class ChatTriggerTests
         var provider = CreateServiceProviderWithServices(chatClientMock.Object);
         var kernel = new Kernel(provider);
         var function = new ChatTrigger(_logger.Object, kernel, _optionsJson);
+        var httpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext();
+        var responseStream = new MemoryStream();
+        httpContext.Response.Body = responseStream;
         var context = new FakeFunctionContext(provider);
+        context.SetHttpContext(httpContext);
         var req = new FakeHttpRequestData(context);
         var payload = new ChatPayload { Utterance = new ChatMessage(ChatRole.User, ""), History = new ChatMessage[0] };
-        var payloadJson = System.Text.Json.JsonSerializer.Serialize(payload, _jsonOptions);
-        var payloadBytes = System.Text.Encoding.UTF8.GetBytes(payloadJson);
+        var payloadJson = JsonSerializer.Serialize(payload, _jsonOptions);
+        var payloadBytes = Encoding.UTF8.GetBytes(payloadJson);
         req.Body.Write(payloadBytes, 0, payloadBytes.Length);
-        req.Body.Seek(0, System.IO.SeekOrigin.Begin);
+        req.Body.Seek(0, SeekOrigin.Begin);
 
         // Act
-        await function.Run(context, payload);
+        await function.Run(req, payload);
 
         // Assert
-        // TODO: Update these assertions based on the actual test framework implementation
-        // Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
-        // var body = await FakeHttpResponseData.ReadBodyAsStringAsync(response);
-        // Assert.Contains("required", body);
+        httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
+        using var reader = new StreamReader(httpContext.Response.Body);
+        var body = await reader.ReadToEndAsync();
+        Assert.Equal(400, httpContext.Response.StatusCode);
+        Assert.Contains("required", body);
     }
 
     [Fact]
@@ -157,32 +175,37 @@ public class ChatTriggerTests
         var provider = CreateServiceProviderWithServices(chatClientMock.Object);
         var kernel = new Kernel(provider);
         var function = new ChatTrigger(_logger.Object, kernel, _optionsJson);
+        var httpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext();
+        var responseStream = new MemoryStream();
+        httpContext.Response.Body = responseStream;
         var context = new FakeFunctionContext(provider);
+        context.SetHttpContext(httpContext);
         var req = new FakeHttpRequestData(context);
         var payload = new ChatPayload { Utterance = new ChatMessage(ChatRole.User, "Hello"), History = new[] { new ChatMessage(ChatRole.User, "Hi there") } };
-        var payloadJson = System.Text.Json.JsonSerializer.Serialize(payload, _jsonOptions);
-        var payloadBytes = System.Text.Encoding.UTF8.GetBytes(payloadJson);
+        var payloadJson = JsonSerializer.Serialize(payload, _jsonOptions);
+        var payloadBytes = Encoding.UTF8.GetBytes(payloadJson);
         req.Body.Write(payloadBytes, 0, payloadBytes.Length);
-        req.Body.Seek(0, System.IO.SeekOrigin.Begin);
+        req.Body.Seek(0, SeekOrigin.Begin);
 
         // Mock the chat client
         var streamingResults = GetStreamingResults(new[] { null, "A", null, "B" });
         chatClientMock.Setup(s => s.GetStreamingResponseAsync(
             It.IsAny<IList<ChatMessage>>(),
             It.IsAny<ChatOptions>(),
-            It.IsAny<System.Threading.CancellationToken>()))
+            It.IsAny<CancellationToken>()))
             .Returns(streamingResults);
 
         // Act
-        await function.Run(context, payload);
+        await function.Run(req, payload);
 
         // Assert
-        // TODO: Update these assertions based on the actual test framework implementation
-        // Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
-        // var body = await FakeHttpResponseData.ReadBodyAsStringAsync(response);
-        // Assert.Contains("A", body);
-        // Assert.Contains("B", body);
-        // Assert.DoesNotContain("null", body);
+        httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
+        using var reader = new StreamReader(httpContext.Response.Body);
+        var body = await reader.ReadToEndAsync();
+        Assert.Equal(200, httpContext.Response.StatusCode);
+        Assert.Contains("A", body);
+        Assert.Contains("B", body);
+        Assert.DoesNotContain("null", body);
     }
 
     // Helper to create an async stream of streaming response updates
@@ -193,16 +216,13 @@ public class ChatTriggerTests
             await Task.Delay(1);
             var update = new ChatResponseUpdate
             {
-                Contents = content != null ? new List<Microsoft.Extensions.AI.AIContent>
+                Contents = content != null ? new List<AIContent>
                 {
                     new Microsoft.Extensions.AI.TextContent(content)
-                } : new List<Microsoft.Extensions.AI.AIContent>()
+                } : new List<AIContent>()
             };
             yield return update;
         }
     }
 
-    // Helper for logger state matching
-    private static Predicate<object> LoggerStateContains(string expected)
-        => v => v != null && v.ToString() != null && v.ToString()!.Contains(expected);
 }
