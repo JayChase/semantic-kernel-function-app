@@ -73,20 +73,19 @@ Answers required during `azd up`:
 
 -   Environment name (used to derive unique resource names)
 -   Subscription
--   Primary location (Function supported region)
--   OpenAI location (can differ; defaults via parameter)
+-   Primary location (location for the resource group and all resources)
+-   OpenAI location (the location to deploy the cognitive services to)
 
 ## Features
 
--   Modern .NET 9 isolated Azure Functions with middleware & DI.
+-   .NET 9 isolated Azure Functions with middleware & DI.
 -   Semantic Kernel + Microsoft.Extensions.AI abstraction for chat.
 -   Streaming responses (SSE style) for low‑latency token display.
--   Angular 19 SSR (Node 22 LTS) hosted on App Service.
+-   Angular SSR (Node 22 LTS) hosted on App Service.
 -   Automated infra: AVM Bicep modules (App Service, Function, Storage, VNet, Private Endpoints, Azure OpenAI, Monitoring, Managed Identity).
 -   User Assigned Managed Identity for Function deployment & data plane auth.
 -   Strict Storage access (shared key disabled + network ACL + VNet rules).
 -   Private endpoints for Azure OpenAI & Storage.
--   Environment materialization scripts (`replace-placeholders.sh`, `update-local-settings.sh`).
 -   Application Insights + Log Analytics dashboard.
 
 ## Services & Resources
