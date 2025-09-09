@@ -55,7 +55,7 @@
     7071
   ],
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "npm i --prefix ./ng-web/ && dotnet restore sk-chat/",
+  "postCreateCommand": "npm i --prefix ./ng-web/ && dotnet restore sk-chat/ && sudo chmod +x infra/replace-placeholders.sh",
   "hostRequirements": {
     "memory": "8gb"
   }
