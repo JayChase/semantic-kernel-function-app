@@ -1,6 +1,6 @@
 # Semantic Kernel Chat Function App + Angular 🚀
 
-A streaming chat application demonstrating real-time AI conversations using Azure OpenAI, Semantic Kernel, and Server-Sent Events (SSE).
+A streaming chat function app demonstrating real-time AI conversations using Azure OpenAI, Semantic Kernel, and Angular.
 
 ## Dev Container / Codespaces
 
