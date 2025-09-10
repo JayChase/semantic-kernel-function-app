@@ -59,9 +59,6 @@ param chatDeploymentName string = chatModelName
 param chatModelVersion string // Set in main.parameters.json
 param chatDeploymentCapacity int = 15
 
-// Id of the user or app to assign application roles
-param principalId string = ''
-
 // Differentiates between automated and manual deployments
 param isContinuousIntegration bool // Set in main.parameters.json
 
@@ -245,7 +242,7 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.15.0' = {
     }
     roleAssignments: [
       {
-        principalId: principalId
+        principalId: faUserAssignedIdentity.outputs.principalId
         principalType: principalType
         roleDefinitionIdOrName: 'Storage Blob Data Contributor'
       }
@@ -306,7 +303,7 @@ module openAi 'br/public:avm/res/cognitive-services/account:0.9.2' = {
     disableLocalAuth: true
     roleAssignments: [
       {
-        principalId: principalId
+        principalId: faUserAssignedIdentity.outputs.principalId
         principalType: principalType
         roleDefinitionIdOrName: 'Cognitive Services OpenAI User'
       }
