@@ -143,3 +143,5 @@ See [LICENSE](./LICENSE).
 ---
 
 Generated with reference to project source, infrastructure templates & azd best practices.
+
+[PR for Awesome AZD contribution](https://github.com/Azure/awesome-azd/pull/643)
