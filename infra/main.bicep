@@ -59,16 +59,12 @@ param chatDeploymentName string = chatModelName
 param chatModelVersion string // Set in main.parameters.json
 param chatDeploymentCapacity int = 15
 
-// Differentiates between automated and manual deployments
-param isContinuousIntegration bool // Set in main.parameters.json
-
 // ---------------------------------------------------------------------------
 // Common variables
 
 var abbrs = loadJsonContent('abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var tags = { 'azd-env-name': environmentName }
-var principalType = isContinuousIntegration ? 'ServicePrincipal' : 'User'
 var openAiUrl = 'https://${openAi.outputs.name}.openai.azure.com'
 var functionAppName = '${abbrs.webSitesFunctions}${resourceToken}'
 var storageAccountName = '${abbrs.storageStorageAccounts}${resourceToken}'
@@ -172,7 +168,6 @@ module functionApp 'br/public:avm/res/web/site:0.13.0' = {
     storageAccountUseIdentityAuthentication: true
     virtualNetworkSubnetId: vnet.outputs.appSubnetID
   }
-  dependsOn: [openAi]
 }
 
 // Compute plan for the Azure Functions API
@@ -243,7 +238,7 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.15.0' = {
     roleAssignments: [
       {
         principalId: faUserAssignedIdentity.outputs.principalId
-        principalType: principalType
+        principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'Storage Blob Data Contributor'
       }
     ]
@@ -304,7 +299,7 @@ module openAi 'br/public:avm/res/cognitive-services/account:0.9.2' = {
     roleAssignments: [
       {
         principalId: faUserAssignedIdentity.outputs.principalId
-        principalType: principalType
+        principalType: 'ServicePrincipal'
         roleDefinitionIdOrName: 'Cognitive Services OpenAI User'
       }
     ]
