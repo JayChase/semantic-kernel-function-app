@@ -11,9 +11,6 @@
     "location": {
       "value": "${AZURE_LOCATION}"
     },
-    "principalId": {
-      "value": "${AZURE_PRINCIPAL_ID}"
-    },
     "openAiLocation": {
       "value": "${AZURE_OPENAI_LOCATION}"
     },
@@ -25,9 +22,6 @@
     },
     "chatModelVersion": {
       "value": "${AZURE_OPENAI_API_MODEL_VERSION=2024-07-18}"
-    },
-    "isContinuousIntegration": {
-      "value": "${CI=false}"
     }
   }
 }
