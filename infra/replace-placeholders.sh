@@ -4,10 +4,9 @@ set -e  # Exit on any error
 
 # Function to display usage
 usage() {
-    echo "Usage: $0 <template_file> <output_file> [env_prefix]"
-    echo "  template_file: Path to the template file with placeholders"
+    echo "Usage: $0 <template_file> <output_file>"
+    echo "  template_file: Path to the template file with placeholders (e.g., %KEY%)"
     echo "  output_file: Path where the processed file will be saved"
-    echo "  env_prefix: Environment variable prefix to filter (default: NG_)"
     exit 1
 }
 
@@ -18,7 +17,6 @@ fi
 
 TEMPLATE_FILE="$1"
 OUTPUT_FILE="$2"
-ENV_PREFIX="${3:-NG_}"
 
 # Check if template file exists
 if [ ! -f "$TEMPLATE_FILE" ]; then
@@ -47,24 +45,50 @@ if [ -z "$ENV_VARS" ]; then
     echo "Make sure the environment has been provisioned with: azd provision"
 fi
 
-# Create a temporary file to store filtered environment variables
+# Create a temporary file to store environment variables (all keys)
 TEMP_ENV_FILE=$(mktemp)
-echo "$ENV_VARS" | grep "^${ENV_PREFIX}" > "$TEMP_ENV_FILE" || true
+# Keep only KEY=VALUE lines (ignore blanks/comments)
+echo "$ENV_VARS" | grep -E '^[A-Za-z_][A-Za-z0-9_]*=' > "$TEMP_ENV_FILE" || true
 
 # Read the template file
 echo "Processing template file: $TEMPLATE_FILE"
 CONTENT=$(cat "$TEMPLATE_FILE")
 
-# Process each environment variable that starts with the prefix
-while IFS='=' read -r key value; do
+# Process each environment variable; replace only if %KEY% exists in the template
+while IFS= read -r line; do
+    # Skip empty lines just in case
+    [ -z "$line" ] && continue
+
+    # Split into key and value at the first '=' only
+    key=${line%%=*}
+    value=${line#*=}
+
     if [ -n "$key" ] && [ -n "$value" ]; then
-        # Remove quotes from value if present
-        clean_value=$(echo "$value" | sed 's/^["'\'']\|["'\'']$//g')
-        
-        echo "Replacing %${key}% with: $clean_value"
-        
-        # Replace all occurrences of %KEY% with the value
-        CONTENT=$(echo "$CONTENT" | sed "s|%${key}%|${clean_value}|g")
+        # Replace only if the placeholder exists
+        if printf '%s' "$CONTENT" | grep -q "%${key}%"; then
+            clean_value="$value"
+            # Strip matching surrounding quotes symmetrically ("..." or '...')
+            if [ "${clean_value#\"}" != "$clean_value" ] && [ "${clean_value%\"}" != "$clean_value" ]; then
+                clean_value=${clean_value:1:${#clean_value}-2}
+            elif [ "${clean_value#\'}" != "$clean_value" ] && [ "${clean_value%\'}" != "$clean_value" ]; then
+                clean_value=${clean_value:1:${#clean_value}-2}
+            else
+                # If there's a stray trailing quote with no leading one, drop it
+                if [ "${clean_value%\"}" != "$clean_value" ] && [ "${clean_value#\"}" = "$clean_value" ]; then
+                    clean_value=${clean_value%\"}
+                fi
+                if [ "${clean_value%\'}" != "$clean_value" ] && [ "${clean_value#\'}" = "$clean_value" ]; then
+                    clean_value=${clean_value%\'}
+                fi
+            fi
+
+            # Escape sed replacement specials: /, &, |
+            esc_value=$(printf '%s' "$clean_value" | sed -e 's/[\/&|]/\\&/g')
+
+            echo "Replacing %${key}%"
+            # Replace all occurrences of %KEY% with the escaped value
+            CONTENT=$(printf '%s' "$CONTENT" | sed "s|%${key}%|${esc_value}|g")
+        fi
     fi
 done < "$TEMP_ENV_FILE"
 

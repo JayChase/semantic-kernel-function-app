@@ -355,5 +355,4 @@ output APPLICATIONINSIGHTS_CONNECTION_STRING string = monitoring.outputs.applica
 output NG_API_URL string = 'https://${functionApp.outputs.defaultHostname}'
 output NG_FUNCTION_APP_NAME string = functionApp.outputs.name
 output NG_RG_NAME string = resourceGroup.name
-
 output WEBAPP_URL string = webApp.outputs.defaultHostname
