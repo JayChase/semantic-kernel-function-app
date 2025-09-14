@@ -111,12 +111,14 @@ Answers required during `azd up`:
 1. Run `azd up` so the open Azure OpenAI service is available.
 2. Start azurite **ctrl + shift + p** then **Azurite: start**
 3. Start debugging the function app **F5**
-4. Run the Angaul app:
+4. Run the Angular app:
 
 ```bash
 cd ng-web
 ng s --ssl --host
 ```
+
+ℹ️ if you are running locall ensure that the [Angular CLI](https://angular.dev/tools/cli#) is installed `npm install -g @angular/cli`
 
 ℹ️ use --host so you can open https://localhost:4200 in your local browser.
 
