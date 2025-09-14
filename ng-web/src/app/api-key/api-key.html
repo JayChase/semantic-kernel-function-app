@@ -2,6 +2,7 @@
   <mat-form-field
     class="api-key__key-input mat-body-medium"
     appearance="outline"
+    subscriptSizing="dynamic"
   >
     <input
       [type]="keyInputType()"
@@ -19,6 +20,15 @@
     <mat-hint
       >If you are using the deployed API paste the function key here
       (<strong>{{getKeyCommand}}</strong>)
+      <button
+        matIconButton
+        color="accent"
+        class="mat-body-title"
+        aria-label="copy the command to the clipboard"
+        [cdkCopyToClipboard]="getKeyCommand"
+      >
+        <mat-icon>content_copy</mat-icon>
+      </button>
     </mat-hint>
   </mat-form-field>
 </mat-card>
