@@ -95,7 +95,7 @@ done < "$TEMP_ENV_FILE"
 # Write the processed content to the output file
 echo "$CONTENT" > "$OUTPUT_FILE"
 
-# Clean up temporary file
+# Clean up temporary files
 rm -f "$TEMP_ENV_FILE"
 
 echo "Successfully processed template and saved to: $OUTPUT_FILE"
