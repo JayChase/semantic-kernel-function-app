@@ -12,12 +12,16 @@ workflows:
 
 hooks:
   postprovision:
-    shell: sh
-    run: ./infra/replace-placeholders.sh ng-web/src/environments/environment-template.ts ng-web/src/environments/environment.ts && ./infra/update-local-settings.sh
+    posix:
+      shell: sh
+      run: ./infra/replace-placeholders.sh ng-web/src/environments/environment-template.ts ng-web/src/environments/environment.ts && ./infra/update-local-settings.sh
+    windows:
+      shell: pwsh
+      run: ./infra/replace-placeholders.ps1 ng-web/src/environments/environment-template.ts ng-web/src/environments/environment.ts; ./infra/update-local-settings.ps1
 
 services:
   ngWeb:
-    project: ./ng-web    
+    project: ./ng-web
     host: appservice
     language: js
     dist: dist/ng-web
@@ -25,5 +29,3 @@ services:
     project: ./sk-chat/SkChat
     language: dotnet
     host: function
-
-
