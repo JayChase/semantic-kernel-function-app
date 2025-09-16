@@ -25,7 +25,12 @@ if ([string]::IsNullOrWhiteSpace($envName)) {
 
 Write-Host "Using Azure environment: $envName"
 
-$localSettingsPath = Join-Path -Path $PSScriptRoot -ChildPath '../sk-chat/SkChat/local.settings.json' | Resolve-Path | Select-Object -ExpandProperty Path
+# Build path to local.settings.json without forcing it to exist yet
+$skChatDir = Join-Path -Path $PSScriptRoot -ChildPath '../sk-chat/SkChat'
+if (-not (Test-Path -LiteralPath $skChatDir -PathType Container)) {
+    throw "SkChat directory not found at: $skChatDir"
+}
+$localSettingsPath = Join-Path -Path $skChatDir -ChildPath 'local.settings.json'
 
 Write-Host "Loading environment variables from azd..."
 $envVarsRaw = ''
@@ -57,8 +62,16 @@ foreach ($line in $lines) {
 
 # Load existing local.settings.json
 if (-not (Test-Path -LiteralPath $localSettingsPath)) {
-    Write-Host "Creating new local.settings.json"
-    $obj = [ordered]@{ IsEncrypted = $false; Values = @{} }
+    Write-Host "Creating new local.settings.json from template"
+    # Create template as provided
+    $obj = [ordered]@{
+        IsEncrypted = $false
+        Host        = [ordered]@{
+            LocalHttpPort = 7071
+            CORS          = "*"
+        }
+        Values      = @{}
+    }
 }
 else {
     $obj = Get-Content -LiteralPath $localSettingsPath -Raw | ConvertFrom-Json -AsHashtable
@@ -67,6 +80,12 @@ else {
 
 # Replace Values with env vars
 $obj['Values'] = $values
+
+# Ensure destination directory exists
+$destDir = Split-Path -Path $localSettingsPath -Parent
+if (-not (Test-Path -LiteralPath $destDir -PathType Container)) {
+    New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+}
 
 # Write back (UTF8 without BOM)
 $json = $obj | ConvertTo-Json -Depth 10
