@@ -57,6 +57,10 @@ while IFS='=' read -r key value; do
   printf '    "%s": "%s"' "$key" "$value" >> "$VALUES_TMP"
   first=0
 done <<< "$ENV_VARS"
+# Always add AzureWebJobsStorage
+if [ $first -eq 0 ]; then echo "," >> "$VALUES_TMP"; fi
+printf '    "AzureWebJobsStorage": "UseDevelopmentStorage=true"' >> "$VALUES_TMP"
+first=0
 echo -e "\n  }" >> "$VALUES_TMP"
 
 # Generate full local.settings.json

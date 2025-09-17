@@ -70,7 +70,9 @@ if (-not (Test-Path -LiteralPath $localSettingsPath)) {
             LocalHttpPort = 7071
             CORS          = "*"
         }
-        Values      = @{}
+        Values      = @{
+            AzureWebJobsStorage = "UseDevelopmentStorage=true"
+        }
     }
 }
 else {
