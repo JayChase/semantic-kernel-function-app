@@ -59,7 +59,7 @@ while IFS='=' read -r key value; do
 done <<< "$ENV_VARS"
 echo -e "\n  }" >> "$VALUES_TMP"
 
-# Generate full local.settings.json deterministically
+# Generate full local.settings.json
 cat > "$TMP_FILE" <<JSON
 {
   "IsEncrypted": false,
