@@ -3,7 +3,7 @@
 {
   "name": "semantic-kernel-function-app",
   // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-  "dockerFile": "Dockerfile",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:9.0-noble",
   // Features to add to the dev container. More info: https://containers.dev/features.
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
