@@ -20,12 +20,6 @@
     "ghcr.io/devcontainers-extra/features/angular-cli:2": {
       "version": "latest"
     },
-    "ghcr.io/devcontainers/features/java:1": {
-      "version": "none",
-      "installGradle": "false",
-      "installMaven": "true",
-      "mavenVersion": "3.9.10"
-    },
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/powershell:1": {},
     "ghcr.io/azure/azure-dev/azd:latest": {}
