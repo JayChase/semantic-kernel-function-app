@@ -21,9 +21,9 @@
       "version": "latest"
     },
     "ghcr.io/devcontainers/features/java:1": {
-      "version": "24",
-      "jdkDistro": "tem",
-      "installMaven": true,
+      "version": "none",
+      "installGradle": "false",
+      "installMaven": "true",
       "mavenVersion": "3.9.10"
     },
     "ghcr.io/devcontainers/features/github-cli:1": {},
