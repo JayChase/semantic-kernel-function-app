@@ -4,7 +4,7 @@ A streaming chat function app demonstrating real-time AI conversations using Azu
 
 ## Dev Container / Codespaces
 
-[![Open in Dev Container](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Container&message=Open&color=2266ee&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/JayChase/semantic-kernel-function-app)
+[![Open in Dev Container](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Container&message=Open&color=2266ee&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode%3A%2F%2Fms-vscode-remote.remote-containers%2FcloneInVolume%3Furl%3Dhttps%3A%2F%2Fgithub.com%2FJayChase%2Fsemantic-kernel-function-app)
 
 ...then follow the [Dev container quick start](#dev-container-quick-start).
 
@@ -14,7 +14,7 @@ A streaming chat function app demonstrating real-time AI conversations using Azu
 
 -   [Dev container quick start](#dev-container-quick-start)
 -   [Local development](#local-development)
--   [Working with the code](#Working-with-the-code)
+-   [Working with the code](#working-with-the-code)
 -   [Features](#features)
 -   [Services & resources](#services--resources)
 -   [Streaming implementation details](#streaming-implementation-details)
@@ -115,10 +115,10 @@ Answers required during `azd up`:
 
 ```bash
 cd ng-web
-ng s --ssl --host
+ng s --ssl --host localhost
 ```
 
-ℹ️ if you are running locall ensure that the [Angular CLI](https://angular.dev/tools/cli#) is installed `npm install -g @angular/cli`
+ℹ️ if you are running local ensure that the [Angular CLI](https://angular.dev/tools/cli#) is installed `npm install -g @angular/cli`
 
 ℹ️ use --host so you can open https://localhost:4200 in your local browser.
 
