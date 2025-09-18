@@ -4,7 +4,7 @@ A streaming chat function app demonstrating real-time AI conversations using Azu
 
 ## Dev Container / Codespaces
 
-[![Open in Dev Container](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Container&message=Open&color=2266ee&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode%3A%2F%2Fms-vscode-remote.remote-containers%2FcloneInVolume%3Furl%3Dhttps%3A%2F%2Fgithub.com%2FJayChase%2Fsemantic-kernel-function-app)
+[![Open in Dev Container](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Container&message=Open&color=2266ee&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/openRepository?url=https://github.com/JayChase/semantic-kernel-function-app)
 
 ...then follow the [Dev container quick start](#dev-container-quick-start).
 
