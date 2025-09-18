@@ -42,8 +42,7 @@
         "ms-dotnettools.csharp",
         "ms-dotnettools.csdevkit",
         "humao.rest-client",
-        "runem.lit-plugin",
-        "jebbs.plantuml"
+        "runem.lit-plugin"
       ]
     }
   },
