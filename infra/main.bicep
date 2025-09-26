@@ -348,7 +348,7 @@ output AZURE_TENANT_ID string = tenant().tenantId
 output AZURE_RESOURCE_GROUP string = resourceGroup.name
 
 output AZURE_OPENAI_API__ENDPOINT string = openAiUrl
-output AZURE_OPENAI_API__INSTANCE_ string = openAi.outputs.name
+output AZURE_OPENAI_API__INSTANCE string = openAi.outputs.name
 output AZURE_OPENAI_API__DEPLOYMENT_NAME string = chatDeploymentName
 output OPENAI_API_VERSION string = openAiApiVersion
 output APPLICATIONINSIGHTS_CONNECTION_STRING string = monitoring.outputs.applicationInsightsConnectionString

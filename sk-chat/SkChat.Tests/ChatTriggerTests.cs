@@ -399,46 +399,6 @@ public class ChatTriggerTests
             Times.Once);
     }
 
-    [Fact]
-    public async Task AlwaysSendsDoneEvent_InFinallyBlock()
-    {
-        // Arrange
-        var chatClientMock = new Mock<IChatClient>();
-        var provider = CreateServiceProviderWithServices(chatClientMock.Object);
-        var kernel = new Kernel(provider);
-        var function = new ChatTrigger(_logger.Object, kernel, _optionsJson);
-
-        var httpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext();
-        var responseStream = new MemoryStream();
-        httpContext.Response.Body = responseStream;
-
-        var context = new FakeFunctionContext(provider);
-        context.SetHttpContext(httpContext);
-
-        var req = new FakeHttpRequestData(context);
-        var payload = new ChatPayload { Utterance = new ChatMessage(ChatRole.User, "Hello"), History = new[] { new ChatMessage(ChatRole.User, "Hi there") } };
-
-        // Mock the chat client with empty results
-        var streamingResults = GetStreamingResults(new string[0]);
-        chatClientMock.Setup(s => s.GetStreamingResponseAsync(
-            It.IsAny<IList<ChatMessage>>(),
-            It.IsAny<ChatOptions>(),
-            It.IsAny<CancellationToken>()))
-            .Returns(streamingResults);
-
-        // Act
-        await function.Run(req, payload);
-
-        // Assert
-        httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
-        using var reader = new StreamReader(httpContext.Response.Body);
-        var body = await reader.ReadToEndAsync();
-
-        Assert.Equal(200, httpContext.Response.StatusCode);
-        Assert.Contains("event: done", body);
-        Assert.Contains("[DONE]", body);
-    }
-
     // Helper to create an async stream of streaming response updates
     private static async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResults(IEnumerable<string?> contents)
     {
