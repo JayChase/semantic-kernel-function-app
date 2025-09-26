@@ -14,10 +14,10 @@ hooks:
   postprovision:
     posix:
       shell: sh
-      run: ./infra/replace-placeholders.sh ng-web/src/environments/environment-template.ts ng-web/src/environments/environment.ts && ./infra/update-local-settings.sh
+      run: ./infra/replace-placeholders.sh ng-web/src/environments/environment-template.ts ng-web/src/environments/environment.ts && ./infra/update-local-settings.sh && ./infra/az-user-openai-authz.sh
     windows:
       shell: pwsh
-      run: ./infra/replace-placeholders.ps1 ng-web/src/environments/environment-template.ts ng-web/src/environments/environment.ts; ./infra/update-local-settings.ps1
+      run: ./infra/replace-placeholders.ps1 ng-web/src/environments/environment-template.ts ng-web/src/environments/environment.ts; ./infra/update-local-settings.ps1; ./infra/az-user-openai-authz.ps1
 
 services:
   ngWeb:

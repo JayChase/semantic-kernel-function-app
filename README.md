@@ -126,6 +126,10 @@ ng s --ssl --host localhost
 
 The Azure OpenAI resource provisioned by `azd up` has **public network access disabled** and is reachable only through its private endpoint inside the VNet. If you run the **Function locally** (so the call to Azure OpenAI originates from your machine) you can temporarily enable full public network access or enable public access for your current IP in the portal
 
+![azd up completed](./docs/cod-networking.png)
+
+The logged in az user is assigned the **Cognitive Services User** role as part of the provisioning. These credentials will be used by the sk-chat function app running locally to access the deployed cognitive services instance. If you need to use another account see the [az-user-openai-authz.sh](./infra/az-user-openai-authz.sh) script to get the az command.
+
 ## Streaming Implementation Details
 
 -   The function uses proper Server-Sent Events (SSE) framing, setting `Content-Type: text/event-stream`. Each message is sent as a `data:` field, followed by two newlines. The stream is terminated with a final `event: done`.
