@@ -39,12 +39,6 @@ A streaming chat function app demonstrating real-time AI conversations using Azu
 
 ![azd up completed](./docs/azd-up-result.png)
 
-5. Login the **Azure CLI**
-
-```bash
-az login --tenant $AZURE_TENANT_ID
-```
-
 6. Copy and run the az command from the UI and run it in the terminal to get the func app key. Paste the key into the UI and start chatting.
 
 7. Run the script to assign the **Cognitive Services User** role to the current az user in order to run the **sk-chat** function app locally (it will use the user the az user credential to access the deployed cognitive services).

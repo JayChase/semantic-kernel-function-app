@@ -1,5 +1,5 @@
  @uri = http://localhost:7071/api
- @uri=https://func-movdd4adkhlj6.azurewebsites.net/api
+ 
 ###
 
 GET {{uri}}/StreamFunction
