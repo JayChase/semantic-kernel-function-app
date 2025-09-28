@@ -22,7 +22,10 @@ import {
 } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { stateful } from '../stateful/stateful';
+import { AiError } from './ai-error';
 import { AiMessage } from './ai-message';
+import { isAiError } from './is-ai-error';
+import { isAiMessage } from './is-ai-message';
 import { isHttpDownloadProgressEvent } from './is-http-download-progress-event';
 import { isHttpResponse } from './is-http-response';
 
@@ -67,13 +70,14 @@ export class ChatClient {
       // as the message will be streamed the updated version will pass through here multiple times
       // so remove the existing version and replace it with the latest
       if (!!aiFeed) {
-        const updatedTranscript = transcript.filter(
-          (aiMessage) => aiMessage.messageId !== aiFeed.messageId
-        );
-
-        updatedTranscript.push(aiFeed);
-
-        return updatedTranscript;
+        return isAiError(aiFeed)
+          ? transcript.slice(0, -1)
+          : [
+              ...transcript.filter(
+                (aiMessage) => aiMessage.messageId !== aiFeed.messageId
+              ),
+              aiFeed
+            ];
       } else {
         return transcript;
       }
@@ -104,7 +108,7 @@ export class ChatClient {
     });
   }
 
-  private chat(chatMessage: AiMessage): Observable<AiMessage> {
+  private chat(chatMessage: AiMessage): Observable<AiMessage | AiError> {
     // this will need to take the transcription and add it as the history
     // optionally it could summarize it
     return this.transcript$.pipe(
@@ -142,16 +146,21 @@ export class ChatClient {
       map((httpEvent) => {
         return this.textToAiMessage(httpEvent);
       }),
-      map((messages) => {
-        if (messages.length === 0) {
+      map((aiData) => {
+        if (aiData.length === 0) {
           return null;
         } else {
-          const aiMessage = messages[messages.length - 1];
-          aiMessage.contents = messages
-            .map((message) => message.contents)
-            .reduce((acc, arr) => [...acc, ...arr], []);
+          const aiDatum = aiData[aiData.length - 1];
+          if (isAiError(aiDatum)) {
+            this.statusSubject.next(`llm error: ${aiDatum.message}`);
+          } else {
+            aiDatum.contents = aiData
+              .filter((aiDatum) => isAiMessage(aiDatum))
+              .map((aiDatum) => aiDatum.contents)
+              .reduce((acc, arr) => [...acc, ...arr], []);
+          }
 
-          return aiMessage;
+          return aiDatum;
         }
       }),
       filter((aiMessage) => !!aiMessage)
@@ -160,7 +169,7 @@ export class ChatClient {
 
   private textToAiMessage(
     httpEvent: HttpDownloadProgressEvent | HttpResponse<string>
-  ): AiMessage[] {
+  ): (AiMessage | AiError)[] {
     const isProgressEvent = isHttpDownloadProgressEvent(httpEvent);
     const text = isProgressEvent ? httpEvent.partialText : httpEvent.body;
 
@@ -171,10 +180,10 @@ export class ChatClient {
           try {
             const data = line.split('data: ')[1];
             const aIChatCompletionDelta = data
-              ? (JSON.parse(data) as AiMessage)
+              ? (JSON.parse(data) as AiMessage | AiError)
               : undefined;
 
-            if (aIChatCompletionDelta) {
+            if (aIChatCompletionDelta && !isAiError(aIChatCompletionDelta)) {
               aIChatCompletionDelta.complete = !isProgressEvent;
             }
 

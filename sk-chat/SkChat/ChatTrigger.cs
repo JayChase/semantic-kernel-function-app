@@ -121,14 +121,13 @@ public class ChatTrigger
             _logger.LogError(ex, "An error occurred during the streaming chat.");
             // It's not possible to change the status code after the response has started streaming.
             // Instead, we send a custom 'error' event to the client.
-            var errorPayload = JsonSerializer.Serialize(new { error = "An internal server error occurred." }, serializerOptions);
-            await response.WriteAsync($"event: error\ndata: {errorPayload}\n\n", CancellationToken.None);
-            await response.Body.FlushAsync(CancellationToken.None);
-        }
-        finally
-        {
-            // Signal the end of the stream to the client, even if an error occurred.
-            await response.WriteAsync("event: done\ndata: [DONE]\n\n", CancellationToken.None);
+
+            var errorPayload = JsonSerializer.Serialize(new ErrorContent(ex.Message ?? "An internal server error occurred.")
+            {
+                ErrorCode = "500",
+
+            }, serializerOptions);
+            await response.WriteAsync($"data: {errorPayload}\n\n", CancellationToken.None);
             await response.Body.FlushAsync(CancellationToken.None);
         }
     }

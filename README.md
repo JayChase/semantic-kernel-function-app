@@ -39,13 +39,17 @@ A streaming chat function app demonstrating real-time AI conversations using Azu
 
 ![azd up completed](./docs/azd-up-result.png)
 
-5. Login the **Azure CLI**
+6. Copy and run the az command from the UI and run it in the terminal to get the func app key. Paste the key into the UI and start chatting.
+
+7. Run the script to assign the **Cognitive Services User** role to the current az user in order to run the **sk-chat** function app locally (it will use the user the az user credential to access the deployed cognitive services).
 
 ```bash
-az login --tenant $AZURE_TENANT_ID
-```
+#bash
+sh ./infra/az-user-openai-authz.sh
 
-6. Copy and run the az command from the UI and run it in the terminal to get the func app key. Paste the key into the UI and start chatting.
+#pwsh
+./infra/az-user-openai-authz.ps1
+```
 
 ![UI](./docs/ui.png)
 
@@ -125,6 +129,10 @@ ng s --ssl --host localhost
 ### Accessing Azure OpenAI from your local machine
 
 The Azure OpenAI resource provisioned by `azd up` has **public network access disabled** and is reachable only through its private endpoint inside the VNet. If you run the **Function locally** (so the call to Azure OpenAI originates from your machine) you can temporarily enable full public network access or enable public access for your current IP in the portal
+
+![azd up completed](./docs/cod-networking.png)
+
+The logged in az user is assigned the **Cognitive Services User** role as part of the provisioning. These credentials will be used by the sk-chat function app running locally to access the deployed cognitive services instance. If you need to use another account see the [az-user-openai-authz.sh](./infra/az-user-openai-authz.sh) script to get the az command.
 
 ## Streaming Implementation Details
 
